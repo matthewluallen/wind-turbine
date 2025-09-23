@@ -1,0 +1,69 @@
+# Class-wide AitM Walk-through (branch-02)
+
+## Answers for branch-01
+
+  * Modbus register types and addresses in use:
+      * `main controller <--> anemometer`: input registers 30001-30009
+          * `main controller` is polling `anemometer` for data
+          * Typical values from the `anemometer`:
+              ```
+              reading input register 30001 --> ~1000
+              reading input register 30002 --> ~1000
+              reading input register 30003 --> ~1000
+              reading input register 30004 --> ~27500
+              reading input register 30005 --> ~28000
+              reading input register 30006 --> ~28500
+              reading input register 30007 --> ~1000
+              reading input register 30008 --> ~1200
+              reading input register 30009 --> ~8000
+              ```
+      * `main controller <--> yaw controller`: input register 30001, holding register 40001
+          * `main controller` is polling `yaw controller` for data, as well as pushing setpoint
+          * Typical values from the `yaw controller`:
+              ```
+              reading input register 30001 --> 0 - 36000
+              reading holding register 40001 --> 0 - 36000
+              ```
+          * Typical values from the `main controller`:
+              ```
+              writing holding register 40001 --> 0 - 36000
+              ```
+      * `main controller <--> blade controllers`: coil 1
+          * `main controller` is pushing setpoint
+          * Typical values from the `main controller`:
+              ```
+              writing coil 1 --> 0 (false)
+              ```
+  * Logic in the `main controller`:
+     * Determines if emergency stop was initiated manually (`manual_stop`) or remotely (`proto_stop`)
+     * Feathers blades if emergency stop or if wind speed (`speed`) is below `cut_in` or above `cut_out`
+          * Adjusts yaw setpoint (`yaw_setpoint`) if current yaw (`current_yaw`) is outside error boundary (`dir_error`)
+  * Logic in `yaw controller`:
+     * Adjusts current yaw (`current_yaw`) by 0.1 degrees in the appropriate direction if current yaw is not at the setpoint (`yaw_setpoint`)
+
+## In this branch, you will begin to:
+
+  * Think like an adversary
+  * Understand the approaches that can be taken to develop adversarial procedures
+
+> NOTE: this branch includes an additional container &mdash; the `adversary` container.
+
+## Steps
+
+  1. If you have not already done so, deploy a new Gitpod workspace for this branch using this URL: https://gitpod.io/#https://github.com/ITI/ICS_Virtualization_Testbed-wind_turbine/tree/branch-02
+  1. Browse to the public port exposed by Gitpod for the `adversary` container (`/vnc.html` path)
+      * Copy the provided on the Ports tab for Adversary (or click on `world` icon to right of links) to open a separate in the browser
+      * Click the `Connect` button in the NoVNC dialogue
+      * To start a terminal &mdash; right-click on desktop > Terminal
+
+## Discussion Starters
+
+* What types of attacks can you think of to do against Modbus?
+    * AitM
+    * Denial of Service
+    * ???
+* What about the Modbus protocol makes it susceptible to such attacks?
+    * Lack of authentication
+    * Lack of message signing
+    * ???
+* Are there any other types of attacks you can think of to do against this turbine?
