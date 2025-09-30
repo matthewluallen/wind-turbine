@@ -8,7 +8,7 @@
 
 ## Steps
 
-  1. Confirm that all the containers are up and running in the Gitpod workspace (there should be _10_ containers running)
+  1. Confirm that all the containers are up and running in the codespace workspace (there should be _10_ containers running)
   1. Browse to the public ports exposed by Gitpod for Grafana and Node-RED HMI
       * Copy the links provided on the Ports tab for Grafana and HMI (or click on `world` icon to right of links) to open two separate tabs in the browser
           * For the Node-RED HMI, use the primary URL and add `/ui` to the path, for example `https://<address>/ui`
