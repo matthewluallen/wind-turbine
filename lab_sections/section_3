@@ -1,6 +1,6 @@
-# Class-wide AitM Walk-through (section_2)
+# Class-wide AitM Walk-through (section_3)
 
-## Answers for section_1
+## Answers for section_2
 
   * Modbus register types and addresses in use:
       * `main controller <--> anemometer`: input registers 30001-30009
