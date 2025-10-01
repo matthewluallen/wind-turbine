@@ -11,13 +11,13 @@
       * Filter on `modbus` in Wireshark to limit packets to just Modbus communications
   * The Grafana turbine dashboard and the Node-RED HMI provide a visual reporting on the state of key weather data as well as the operation of the turbine.
   * The configuration files are for the following controllers:
-      * `alpine-eclipse.yml`: this is the yaw controller
+      * `yaw-controller.yml`: this is the yaw controller
           * This controller monitors the current yaw setting as well as the set point for the yaw.
-      * `crazy-trader.yml`, `odd-prodigy.yml`, and `wavy-bird.yml`: these are the blade controllers
+      * `blade-1.yml`, `blade-2.yml`, and `blade-3.yml`: these are the blade controllers
           * These controllers change the pitch for each blade (a boolean value &mdash; feathered or not feathered).
-      * `exalted-bear.yml`: this is the anemometer controller
+      * `anemometer.yml`: this is the anemometer controller
           * This controller ingests the data from the `weather.csv` file and then publishes it as live weather updates.
-      * `low-patriot.yml`: this is the main controller
+      * `main-controller.yml`: this is the main controller
           * Based on data published from the other controllers, this controller publishes adjustments to the blades (whether or not to feather) and to the yaw controller (what direction to face).
           * As the wind speed, temperature, and pressure change &mdash; along with the feather value for each blade &mdash; the appropriate power generation is calculated (and simulated).
 
@@ -34,13 +34,12 @@
 
 ## Steps
 
-  1. If you have not already done so, deploy a new Gitpod workspace for this branch using this URL: https://gitpod.io/#https://github.com/ITI/ICS_Virtualization_Testbed-wind_turbine/tree/branch-01
   1. Browse to the public port exposed by Gitpod for the `wireshark` container (add `/vnc.html` to the primary URL similar to the Node-RED HMI)
       * Copy the provided on the Ports tab for Wireshark (or click on `world` icon to right of links) to open a separate in the browser
       * Click the `Connect` button in the NoVNC dialogue
       * Wireshark should be running already &mdash; if not, right-click on desktop > Wireshark to start Wireshark
       * Begin to capture traffic on interface that starts with `br-`
-  1. Review the logic in the `configs/ot-sim/main-ctlr.xml` and `configs/ot-sim/yaw-ctlr.xml` configuration files.
+  2. Review the logic in the `configs/ot-sim/main-controller.xml` and `configs/ot-sim/yaw-controller.xml` configuration files.
 
 ## After completing the above steps, you should work to:
 
