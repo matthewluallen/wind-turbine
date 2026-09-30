@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt update && apt install -y git-lfs unzip
+apt update && apt install -y git-lfs unzip python3
 
 git lfs pull
 
