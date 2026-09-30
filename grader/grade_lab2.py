@@ -2,11 +2,16 @@
 """
 Lab 2 self-check  --  CS460 Module 4 (Wind Farm & DNP3, 24 pts)
 ===============================================================
-Students fill lab2_answers.json and run:
+Fill lab2_answers.json and run:
     python3 grade_lab2.py lab2_answers.json
 Instant feedback; resubmit any time. Instructor runs the same grader for the
-recorded score. Correctness anchors are salted SHA-256 hashes (no answers in
-source); open-ended Q4 gets a keyword check + human-review flag.
+recorded score.
+
+FULLY DETERMINISTIC (no LLM). Correctness anchors are salted SHA-256 hashes
+(no answers in source). Q4 (Modbus vs DNP3) now auto-scores by CONCEPT
+COVERAGE: 3 points per distinct difference-category named, capped at 9. It
+prints the categories it detected so the instructor can spot-check for
+keyword-stuffing.
 
 Template (lab2_answers.json):
 {
@@ -31,7 +36,6 @@ def _norm_flow(s):
     m = re.findall(r'(\d{1,3}(?:\.\d{1,3}){3})(?::(\d+))?', s)
     if len(m) >= 2:
         return f"{m[0][0]}->{m[-1][0]}:{m[-1][1] or ''}"
-    # allow hostname:port form (wtg-1:20000)
     m2 = re.search(r'(:20000)\b', s)
     return "dnp3:20000" if m2 else s
 
@@ -42,7 +46,7 @@ def _norm_creds(s):
 def grade(path):
     try: ans = json.load(open(path))
     except Exception as e: print(f"ERROR reading {path}: {e}"); sys.exit(2)
-    print("="*60); print("LAB 2 SELF-CHECK"); print("="*60)
+    print("="*64); print("LAB 2 SELF-CHECK  (deterministic; no LLM)"); print("="*64)
 
     # Q1 (6): DNP3 farm->turbine flows
     flows = ans.get("q1_trusted_flows", [])
@@ -66,20 +70,31 @@ def grade(path):
     print(f"[{'PASS' if q3==6 else '----'}] Q3 new interaction      {q3}/6")
     if q3==0: print("     -> describe what you did AND its flow as src IP:port -> dst IP:port")
 
-    # Q4 (9): Modbus vs DNP3 -> keyword check + human review
-    q4 = str(ans.get("q4_modbus_vs_dnp3","")).lower()
-    hits = sum(bool(re.search(p, q4)) for p in
-               [r'register', r'typed|analog|binary|point', r'select.?before.?operate|sbo',
-                r'timestamp|event', r'unsolicit'])
-    q4_ok = len(q4.strip()) >= 80 and hits >= 3
-    print(f"[{'SEEN' if q4_ok else '----'}] Q4 Modbus vs DNP3       {'(>=3 concrete differences, ready for review)' if q4_ok else '0/9'}")
-    if not q4_ok: print("     -> name at least three concrete differences (data model, addressing, SBO, events/timestamps, unsolicited)")
+    # Q4 (9): Modbus vs DNP3 -> coverage score, 3 pts per distinct difference category
+    q4txt = str(ans.get("q4_modbus_vs_dnp3","")).strip()
+    categories = {
+        "data-model":        r'register|coil|typed|analog|binary|point type|data model',
+        "addressing":        r'address|point index|\bindex\b|group.?variation|\bobject\b|\bgroup\b',
+        "control-semantics": r'select.?before.?operate|\bsbo\b|direct.?operate|control relay|operate command',
+        "events-timestamps": r'timestamp|time.?tag|event|sequence of events|\bsoe\b|time.?stamped',
+        "unsolicited":       r'unsolicit|report.?by.?exception|\brbe\b|push|spontaneous',
+        "integrity":         r'\bcrc\b|checksum|integrity|robust|reliab',
+        "transport-port":    r'\b20000\b|\b502\b|\bports?\b',
+    }
+    tl = q4txt.lower()
+    q4_cats = [k for k, pat in categories.items() if re.search(pat, tl)]
+    q4 = 0 if len(q4txt) < 60 else min(9, 3 * len(q4_cats))
+    print(f"[{'PASS' if q4==9 else '----'}] Q4 Modbus vs DNP3       {q4}/9   (categories: {', '.join(q4_cats) or 'none'})")
+    if q4 < 9: print("     -> name at least three concrete difference categories: data model, addressing, "
+                     "control (select-before-operate), events/timestamps, unsolicited reporting, integrity, transport/port")
 
-    auto = q1 + q2 + q3
-    print("-"*60)
-    print(f"AUTO-CHECKED: {auto}/15   (Q4 = 9 pts: keyword-screened, instructor-reviewed)")
+    total = q1 + q2 + q3 + q4
+    print("-"*64)
+    print(f"AUTO-SCORED TOTAL: {total}/24")
+    print("Q4 is scored by concept coverage (deterministic, no LLM); the")
+    print("instructor may spot-check for keyword-stuffing.")
     print("Fix any '----' items and resubmit.")
-    return auto
+    return total
 
 if __name__ == "__main__":
     a=[x for x in sys.argv[1:] if not x.startswith("--")]
