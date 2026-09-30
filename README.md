@@ -50,3 +50,17 @@ The Wireshark application will automatically start when the `Wireshark` port is 
 When the `Adversary` port is accessed, right click on the desktop and open the `Terminal` application. Maximize the terminal window and run the attack by typing `./attack.sh` in the terminal. This will start a `tmux` session with `mitmproxy` running in the left pane and `arpspoof` running in the two right panes. This attack intercepts all Modbus responses from the anemometer controller and sets the values to zero, making the main controller think their is no wind and causing it to instruct the blade controllers to feather.
 
 ![](media/aitm.gif)
+
+## Using as Part of a Wind Farm
+
+Multiple instances of this wind turbine project can be deployed as part of a larger [wind farm](https://github.com/patsec/wind-farm). To achieve this when using Codespaces, a [Tailscale](https://tailscale.com) mesh network can be used to add wind turbines and a wind farm controller to the same network no matter where in Codespaces they end up being deployed. A Tailscale account can be [created](https://login.tailscale.com/start) for free, and an [authentication key](https://login.tailscale.com/admin/settings/keys) can be generated for use by the OT-sim Tailscale module to add wind turbines and a wind farm controller to the Tailscale mesh network.
+
+> [!TIP]
+> See the [wind farm](https://github.com/patsec/wind-farm) project for instructions on how to create a Tailscale authentication key and add it to your GitHub account for use by wind turbines.
+
+The wind farm controller is configured to communicate with wind turbines with specific DNS names (`wtg-1, wtg-2, ...`). This wind turbine project has separate codespace configurations that configure each turbine with the appropriate DNS name in Tailscale.
+
+> [!TIP]
+> Create a new codespace using [this link](https://github.com/codespaces/new?repo=701012652&ref=main&hide_repo_select=true) and select the specific turbine to deploy from the `Dev container configuration` dropdown.
+>
+> ![](media/specific-turbine.png)
