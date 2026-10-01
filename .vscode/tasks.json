@@ -1,0 +1,18 @@
+{
+  // Auto-started keep-alive: prints once a minute so terminal activity keeps the
+  // Codespace from hitting its idle timeout during class. Terminal activity is what
+  // resets the idle timer (a shared port alone does not). Remove this file or set
+  // "runOn" to "default" to turn it off.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "keep-alive",
+      "type": "shell",
+      "command": "while true; do echo \"keep-alive $(date)\"; sleep 60; done",
+      "isBackground": true,
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "reveal": "silent", "panel": "dedicated" },
+      "problemMatcher": []
+    }
+  ]
+}
