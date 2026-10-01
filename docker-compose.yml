@@ -58,7 +58,8 @@ services:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
     depends_on:
-    - opensearch
+      opensearch:
+        condition: service_healthy
     volumes:
     - ./configs/ot-sim/yaw-controller.xml:/etc/ot-sim/config.xml
     networks:
@@ -106,7 +107,17 @@ services:
       vpc:
         ipv4_address: 10.11.12.105
   opensearch:
-    image: opensearchproject/opensearch
+    image: opensearchproject/opensearch:2.11.1
+    environment:
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
     init: true
     volumes:
     - ./configs/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
