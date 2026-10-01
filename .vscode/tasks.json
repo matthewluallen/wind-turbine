@@ -1,18 +1,24 @@
 {
-  // Keep-alive: keeps the Codespace awake WHILE you work via the browser/ports.
-  // Clicking in the HMI or Grafana does NOT reset the idle timer (only terminal or
-  // editor activity does), so this prints once a minute to stand in for that.
+  // Keep-alive: keeps the Codespace awake WHILE you are actually working through a
+  // lab service port (Node-RED HMI 1880, Grafana 3000, noVNC Wireshark 8080).
+  // Clicking in those browser tabs does NOT reset the Codespace idle timer (only
+  // terminal/editor activity does), so this task prints a heartbeat to the terminal
+  // once a minute to stand in for that -- but ONLY while one of those ports has an
+  // active browser connection.
   //
-  // It is BOUNDED on purpose: it runs for KEEPALIVE_MINUTES (default 90) and then
-  // stops, so a Codespace left open but unused still idle-times-out normally instead
-  // of running forever. Set a KEEPALIVE_MINUTES Codespaces variable to change the
-  // window, or remove this file to turn it off.
+  // The logic lives in scripts/keepalive.sh: it watches those ports with 'ss', stays
+  // awake while a tab is connected, then after a short grace window (default 5 min)
+  // with no connections it STOPS, so a Codespace with tabs left open but abandoned
+  // still idle-times-out. A hard cap (default 2 h) bounds the total time.
+  //
+  // Tune via Codespaces variables KEEPALIVE_PORTS / KEEPALIVE_GRACE_MIN /
+  // KEEPALIVE_CAP_MIN, or remove this file to turn it off.
   "version": "2.0.0",
   "tasks": [
     {
       "label": "keep-alive",
       "type": "shell",
-      "command": "for i in $(seq 1 ${KEEPALIVE_MINUTES:-90}); do echo \"keep-alive $i/${KEEPALIVE_MINUTES:-90} - $(date)\"; sleep 60; done; echo \"keep-alive window ended - the Codespace will idle-time-out normally now if unused\"",
+      "command": "bash scripts/keepalive.sh",
       "isBackground": true,
       "runOptions": { "runOn": "folderOpen" },
       "presentation": { "reveal": "silent", "panel": "dedicated" },
