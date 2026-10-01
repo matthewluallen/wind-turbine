@@ -2,15 +2,15 @@
 # Connection-gated keep-alive for CS460 Module 4 Codespaces.
 # Prints to this terminal (which resets the Codespace idle timer) ONLY while a lab
 # network-service port has an active browser connection (Node-RED HMI 1880,
-# Grafana 3000, noVNC Wireshark 8080). After the tabs disconnect it waits a short
-# grace window, then stops, so the Codespace idle-times-out normally. A hard cap
-# bounds total keep-alive time in case a tab is left open and abandoned.
+# Grafana 3000, noVNC Wireshark 8080, Caldera 8888). After the tabs disconnect it
+# waits a short grace window, then stops, so the Codespace idle-times-out normally.
+# A hard cap bounds total keep-alive time in case a tab is left open and abandoned.
 #
 # Tunable via Codespaces variables:
-#   KEEPALIVE_PORTS      space-separated ports to watch (default: 1880 3000 8080)
+#   KEEPALIVE_PORTS      space-separated ports to watch (default: 1880 3000 8080 8888)
 #   KEEPALIVE_GRACE_MIN  minutes to stay awake after last connection (default: 5)
 #   KEEPALIVE_CAP_MIN    hard cap on total keep-alive minutes       (default: 120)
-PORTS="${KEEPALIVE_PORTS:-1880 3000 8080}"
+PORTS="${KEEPALIVE_PORTS:-1880 3000 8080 8888}"
 GRACE_MIN="${KEEPALIVE_GRACE_MIN:-5}"
 CAP_MIN="${KEEPALIVE_CAP_MIN:-120}"
 
