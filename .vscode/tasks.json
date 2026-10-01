@@ -1,14 +1,18 @@
 {
-  // Auto-started keep-alive: prints once a minute so terminal activity keeps the
-  // Codespace from hitting its idle timeout during class. Terminal activity is what
-  // resets the idle timer (a shared port alone does not). Remove this file or set
-  // "runOn" to "default" to turn it off.
+  // Keep-alive: keeps the Codespace awake WHILE you work via the browser/ports.
+  // Clicking in the HMI or Grafana does NOT reset the idle timer (only terminal or
+  // editor activity does), so this prints once a minute to stand in for that.
+  //
+  // It is BOUNDED on purpose: it runs for KEEPALIVE_MINUTES (default 90) and then
+  // stops, so a Codespace left open but unused still idle-times-out normally instead
+  // of running forever. Set a KEEPALIVE_MINUTES Codespaces variable to change the
+  // window, or remove this file to turn it off.
   "version": "2.0.0",
   "tasks": [
     {
       "label": "keep-alive",
       "type": "shell",
-      "command": "while true; do echo \"keep-alive $(date)\"; sleep 60; done",
+      "command": "for i in $(seq 1 ${KEEPALIVE_MINUTES:-90}); do echo \"keep-alive $i/${KEEPALIVE_MINUTES:-90} - $(date)\"; sleep 60; done; echo \"keep-alive window ended - the Codespace will idle-time-out normally now if unused\"",
       "isBackground": true,
       "runOptions": { "runOn": "folderOpen" },
       "presentation": { "reveal": "silent", "panel": "dedicated" },
