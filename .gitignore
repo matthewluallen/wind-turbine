@@ -1,2 +1,3 @@
 configs/grafana/plugins/*
 !configs/grafana/plugins/.gitkeep
+.devcontainer/start.log

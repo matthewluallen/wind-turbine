@@ -1,11 +1,9 @@
 {
   "name": "wtg-7",
   "image": "debian:bookworm",
-
   "containerEnv": {
     "HOSTNAME": "wtg-7"
   },
-
   "customizations": {
     "vscode": {
       "settings": {
@@ -14,31 +12,40 @@
             "path": "/bin/bash"
           }
         },
-
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
   },
-
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-
+  "forwardPorts": [
+    1880,
+    3000,
+    8080,
+    8090
+  ],
   "portsAttributes": {
     "1880": {
-      "label": "Turbine HMI"
+      "label": "Turbine HMI (open /ui)",
+      "onAutoForward": "silent"
     },
     "3000": {
-      "label": "Turbine Ground Truth"
+      "label": "Turbine Ground Truth (Grafana)",
+      "onAutoForward": "silent"
     },
     "8080": {
-      "label": "Wireshark"
+      "label": "Wireshark (open vnc.html)",
+      "onAutoForward": "silent"
     },
     "8090": {
-      "label": "Adversary"
+      "label": "Adversary (open vnc.html)",
+      "onAutoForward": "silent"
     }
   },
-
+  "otherPortsAttributes": {
+    "onAutoForward": "ignore"
+  },
   "onCreateCommand": "bash .devcontainer/on-create.sh",
-  "postStartCommand": "docker compose up -d"
+  "postStartCommand": "bash .devcontainer/start.sh"
 }

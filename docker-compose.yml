@@ -5,6 +5,7 @@ services:
       dockerfile: ./Dockerfile.tools
     image: ghcr.io/patsec/wind-turbine/tools:main
     init: true
+    restart: unless-stopped
     privileged: true # required for capturing traffic on host interfaces
     network_mode: host
     volumes:
@@ -16,6 +17,7 @@ services:
       dockerfile: ./Dockerfile.tools
     image: ghcr.io/patsec/wind-turbine/tools:main
     init: true
+    restart: unless-stopped
     privileged: true # required for iptables to work
 #   sysctls: # uncomment this section if Docker host doesn't already have IP forwarding enabled
 #   - net.ipv4.ip_forward=1
@@ -33,6 +35,7 @@ services:
   main-ctlr:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
+    restart: unless-stopped
     cap_add:
     - NET_ADMIN # for Tailscale
     depends_on:
@@ -50,13 +53,14 @@ services:
     - 1880:1880
     environment:
     - OTSIM_TAILSCALE_AUTHKEY=${OTSIM_TAILSCALE_AUTHKEY} # for Tailscale
-    hostname: ${HOSTNAME} # for Tailscale
+    hostname: ${HOSTNAME:-wind-turbine} # for Tailscale
     networks:
       vpc:
         ipv4_address: 10.11.12.100
   yaw-ctlr:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
+    restart: unless-stopped
     depends_on:
       opensearch:
         condition: service_healthy
@@ -68,6 +72,7 @@ services:
   anemometer:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
+    restart: unless-stopped
     depends_on:
     - opensearch
     volumes:
@@ -79,6 +84,7 @@ services:
   blade-1:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
+    restart: unless-stopped
     depends_on:
     - opensearch
     volumes:
@@ -89,6 +95,7 @@ services:
   blade-2:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
+    restart: unless-stopped
     depends_on:
     - opensearch
     volumes:
@@ -99,6 +106,7 @@ services:
   blade-3:
     image: ghcr.io/patsec/ot-sim/ot-sim:main
     init: true
+    restart: unless-stopped
     depends_on:
     - opensearch
     volumes:
@@ -116,9 +124,10 @@ services:
       test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 30
-      start_period: 20s
+      retries: 60
+      start_period: 30s
     init: true
+    restart: unless-stopped
     volumes:
     - ./configs/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
     networks:
@@ -127,6 +136,7 @@ services:
   grafana:
     image: grafana/grafana-oss
     init: true
+    restart: unless-stopped
     depends_on:
     - opensearch
     ports:
