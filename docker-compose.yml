@@ -31,7 +31,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.200
   main-ctlr:
-    image: ghcr.io/patsec/ot-sim/ot-sim:main
+    image: ghcr.io/patsec/ot-sim:main
     init: true
     cap_add:
     - NET_ADMIN # for Tailscale
@@ -55,7 +55,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.100
   yaw-ctlr:
-    image: ghcr.io/patsec/ot-sim/ot-sim:main
+    image: ghcr.io/patsec/ot-sim:main
     init: true
     depends_on:
       opensearch:
@@ -66,7 +66,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.101
   anemometer:
-    image: ghcr.io/patsec/ot-sim/ot-sim:main
+    image: ghcr.io/patsec/ot-sim:main
     init: true
     depends_on:
     - opensearch
@@ -77,7 +77,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.102
   blade-1:
-    image: ghcr.io/patsec/ot-sim/ot-sim:main
+    image: ghcr.io/patsec/ot-sim:main
     init: true
     depends_on:
     - opensearch
@@ -87,7 +87,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.103
   blade-2:
-    image: ghcr.io/patsec/ot-sim/ot-sim:main
+    image: ghcr.io/patsec/ot-sim:main
     init: true
     depends_on:
     - opensearch
@@ -97,7 +97,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.104
   blade-3:
-    image: ghcr.io/patsec/ot-sim/ot-sim:main
+    image: ghcr.io/patsec/ot-sim:main
     init: true
     depends_on:
     - opensearch
