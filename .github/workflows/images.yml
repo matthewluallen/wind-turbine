@@ -11,7 +11,7 @@ name: Build and mirror images
 on:
   workflow_dispatch:
   push:
-    branches: [main, self-hosted-images]
+    branches: [main]
     paths:
       - .github/workflows/images.yml
       - .github/devcontainer-base/**
@@ -27,6 +27,8 @@ env:
   OPENSEARCH_PLUGIN_VERSION: 2.13.0
   TOOLS_TAG: v1
   DEVCONTAINER_TAG: v1
+  # Intel/AMD (Codespaces, most PCs) and ARM (Apple Silicon Macs)
+  PLATFORMS: linux/amd64,linux/arm64
 
 permissions:
   contents: read
@@ -42,6 +44,13 @@ jobs:
       - name: Log in to ghcr.io
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
+      - name: Set up multi-platform builds
+        run: |
+          docker run --privileged --rm tonistiigi/binfmt --install arm64
+          docker buildx create --name multi --driver docker-container --use
+          docker buildx inspect --bootstrap
+
+      # imagetools copies every processor variant the upstream image publishes
       - name: Mirror OT-sim and OpenSearch
         run: |
           docker buildx imagetools create -t "$REGISTRY/ot-sim:$OTSIM_TAG" "ghcr.io/patsec/ot-sim:$OTSIM_TAG"
@@ -49,22 +58,21 @@ jobs:
 
       - name: Build and push tools image
         run: |
-          docker build -f Dockerfile.tools -t "$REGISTRY/tools:$TOOLS_TAG" .
-          docker push "$REGISTRY/tools:$TOOLS_TAG"
+          docker buildx build --platform "$PLATFORMS" -f Dockerfile.tools \
+            -t "$REGISTRY/tools:$TOOLS_TAG" --push .
 
       - name: Build and push Grafana image
         run: |
-          TAG="$REGISTRY/grafana:$GRAFANA_VERSION-opensearch-$OPENSEARCH_PLUGIN_VERSION"
-          docker build -f Dockerfile.grafana \
+          docker buildx build --platform "$PLATFORMS" -f Dockerfile.grafana \
             --build-arg GRAFANA_VERSION="$GRAFANA_VERSION" \
             --build-arg OPENSEARCH_PLUGIN_VERSION="$OPENSEARCH_PLUGIN_VERSION" \
-            -t "$TAG" .
-          docker push "$TAG"
+            -t "$REGISTRY/grafana:$GRAFANA_VERSION-opensearch-$OPENSEARCH_PLUGIN_VERSION" --push .
 
       - name: Build and push Codespace base image
         run: |
           npm install -g @devcontainers/cli
           devcontainer build \
             --workspace-folder .github/devcontainer-base \
+            --platform "$PLATFORMS" \
             --image-name "$REGISTRY/devcontainer:$DEVCONTAINER_TAG" \
             --push

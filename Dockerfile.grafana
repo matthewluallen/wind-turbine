@@ -2,11 +2,14 @@
 # never has to download the plugin from grafana.com at creation time.
 ARG GRAFANA_VERSION=13.0.2
 
-FROM debian:bookworm-slim AS plugin
+# Runs on the build machine's own processor; TARGETARCH (amd64 or arm64) picks
+# which build of the plugin to download for the image being produced.
+FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS plugin
 ARG OPENSEARCH_PLUGIN_VERSION=2.13.0
+ARG TARGETARCH
 RUN apt update \
   && apt install -y --no-install-recommends ca-certificates curl unzip \
-  && curl -fL -o /tmp/opensearch.zip "https://grafana.com/api/plugins/grafana-opensearch-datasource/versions/${OPENSEARCH_PLUGIN_VERSION}/download?os=linux&arch=amd64" \
+  && curl -fL -o /tmp/opensearch.zip "https://grafana.com/api/plugins/grafana-opensearch-datasource/versions/${OPENSEARCH_PLUGIN_VERSION}/download?os=linux&arch=${TARGETARCH}" \
   && mkdir -p /plugins \
   && unzip -q -d /plugins /tmp/opensearch.zip
 
