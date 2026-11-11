@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.tools
-    image: ghcr.io/matthewluallen/wind-turbine/tools:v1
+    image: ghcr.io/matthewluallen/wind-turbine/tools:v2
     init: true
     privileged: true # required for capturing traffic on host interfaces
     network_mode: host
@@ -14,7 +14,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.tools
-    image: ghcr.io/matthewluallen/wind-turbine/tools:v1
+    image: ghcr.io/matthewluallen/wind-turbine/tools:v2
     init: true
     privileged: true # required for iptables to work
 #   sysctls: # uncomment this section if Docker host doesn't already have IP forwarding enabled
@@ -125,7 +125,7 @@ services:
       vpc:
         ipv4_address: 10.11.12.150
   grafana:
-    image: ghcr.io/matthewluallen/wind-turbine/grafana:13.0.2-opensearch-2.13.0
+    image: ghcr.io/matthewluallen/wind-turbine/grafana:13.0.2-opensearch-2.13.0-r2
     init: true
     depends_on:
     - opensearch

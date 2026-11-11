@@ -1,6 +1,6 @@
 {
   "name": "wtg-6",
-  "image": "ghcr.io/matthewluallen/wind-turbine/devcontainer:v1",
+  "image": "ghcr.io/matthewluallen/wind-turbine/devcontainer:v2",
 
   "containerEnv": {
     "HOSTNAME": "wtg-6"
