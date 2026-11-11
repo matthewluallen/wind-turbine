@@ -1,0 +1,70 @@
+name: Build and mirror images
+
+# Publishes every image a Codespace needs under ghcr.io/matthewluallen/wind-turbine
+# so that launching a Codespace does not depend on anyone else's registry.
+# Upstream sources are only contacted here, when this workflow runs.
+#
+# To move to a newer upstream version: change the version below AND the
+# matching tag in docker-compose.yml (or .devcontainer/*/devcontainer.json),
+# then test one Codespace before telling the class.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, self-hosted-images]
+    paths:
+      - .github/workflows/images.yml
+      - .github/devcontainer-base/**
+      - Dockerfile.tools
+      - Dockerfile.grafana
+      - configs/docker/**
+
+env:
+  REGISTRY: ghcr.io/matthewluallen/wind-turbine
+  OTSIM_TAG: 9dc3304            # ghcr.io/patsec/ot-sim build to mirror
+  OPENSEARCH_VERSION: 2.11.1
+  GRAFANA_VERSION: 13.0.2
+  OPENSEARCH_PLUGIN_VERSION: 2.13.0
+  TOOLS_TAG: v1
+  DEVCONTAINER_TAG: v1
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  images:
+    if: github.repository == 'matthewluallen/wind-turbine'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Mirror OT-sim and OpenSearch
+        run: |
+          docker buildx imagetools create -t "$REGISTRY/ot-sim:$OTSIM_TAG" "ghcr.io/patsec/ot-sim:$OTSIM_TAG"
+          docker buildx imagetools create -t "$REGISTRY/opensearch:$OPENSEARCH_VERSION" "opensearchproject/opensearch:$OPENSEARCH_VERSION"
+
+      - name: Build and push tools image
+        run: |
+          docker build -f Dockerfile.tools -t "$REGISTRY/tools:$TOOLS_TAG" .
+          docker push "$REGISTRY/tools:$TOOLS_TAG"
+
+      - name: Build and push Grafana image
+        run: |
+          TAG="$REGISTRY/grafana:$GRAFANA_VERSION-opensearch-$OPENSEARCH_PLUGIN_VERSION"
+          docker build -f Dockerfile.grafana \
+            --build-arg GRAFANA_VERSION="$GRAFANA_VERSION" \
+            --build-arg OPENSEARCH_PLUGIN_VERSION="$OPENSEARCH_PLUGIN_VERSION" \
+            -t "$TAG" .
+          docker push "$TAG"
+
+      - name: Build and push Codespace base image
+        run: |
+          npm install -g @devcontainers/cli
+          devcontainer build \
+            --workspace-folder .github/devcontainer-base \
+            --image-name "$REGISTRY/devcontainer:$DEVCONTAINER_TAG" \
+            --push
