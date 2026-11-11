@@ -9,6 +9,8 @@
   },
 
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    // lets `gh codespace ssh` / `gh codespace logs` work for troubleshooting
+    "ghcr.io/devcontainers/features/sshd:1": {}
   }
 }
