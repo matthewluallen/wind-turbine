@@ -14,7 +14,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/images.yml
-      - .github/devcontainer-base/**
+      - Dockerfile.devcontainer
       - Dockerfile.tools
       - Dockerfile.grafana
       - configs/docker/**
@@ -25,8 +25,9 @@ env:
   OPENSEARCH_VERSION: 2.11.1
   GRAFANA_VERSION: 13.0.2
   OPENSEARCH_PLUGIN_VERSION: 2.13.0
-  TOOLS_TAG: v1
-  DEVCONTAINER_TAG: v1
+  GRAFANA_BUILD: r2             # bump when Dockerfile.grafana changes
+  TOOLS_TAG: v2
+  DEVCONTAINER_TAG: v2
   # Intel/AMD (Codespaces, most PCs) and ARM (Apple Silicon Macs)
   PLATFORMS: linux/amd64,linux/arm64
 
@@ -66,13 +67,29 @@ jobs:
           docker buildx build --platform "$PLATFORMS" -f Dockerfile.grafana \
             --build-arg GRAFANA_VERSION="$GRAFANA_VERSION" \
             --build-arg OPENSEARCH_PLUGIN_VERSION="$OPENSEARCH_PLUGIN_VERSION" \
-            -t "$REGISTRY/grafana:$GRAFANA_VERSION-opensearch-$OPENSEARCH_PLUGIN_VERSION" --push .
+            -t "$REGISTRY/grafana:$GRAFANA_VERSION-opensearch-$OPENSEARCH_PLUGIN_VERSION-$GRAFANA_BUILD" --push .
 
+      # The base image is Dockerfile.devcontainer plus Docker-in-Docker and an
+      # SSH server (so `gh codespace ssh` works). The dev container config for
+      # it is written here, not kept in the repo, so the only devcontainer.json
+      # files in the repo are the ones students choose from.
       - name: Build and push Codespace base image
         run: |
+          mkdir -p /tmp/base/.devcontainer
+          cp Dockerfile.devcontainer /tmp/base/.devcontainer/Dockerfile
+          cat > /tmp/base/.devcontainer/devcontainer.json <<'JSON'
+          {
+            "name": "wind-turbine-base",
+            "build": { "dockerfile": "Dockerfile" },
+            "features": {
+              "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+              "ghcr.io/devcontainers/features/sshd:1": {}
+            }
+          }
+          JSON
           npm install -g @devcontainers/cli
           devcontainer build \
-            --workspace-folder .github/devcontainer-base \
+            --workspace-folder /tmp/base \
             --platform "$PLATFORMS" \
             --image-name "$REGISTRY/devcontainer:$DEVCONTAINER_TAG" \
             --push
