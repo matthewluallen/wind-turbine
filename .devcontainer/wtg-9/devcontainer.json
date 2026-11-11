@@ -1,6 +1,6 @@
 {
   "name": "wtg-9",
-  "image": "debian:bookworm",
+  "image": "ghcr.io/matthewluallen/wind-turbine/devcontainer:v1",
 
   "containerEnv": {
     "HOSTNAME": "wtg-9"
@@ -18,10 +18,6 @@
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
-  },
-
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
   "portsAttributes": {

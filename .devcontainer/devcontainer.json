@@ -1,6 +1,6 @@
 {
   "name": "wind-turbine",
-  "image": "debian:bookworm",
+  "image": "ghcr.io/matthewluallen/wind-turbine/devcontainer:v1",
 
   "customizations": {
     "vscode": {
@@ -14,10 +14,6 @@
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
-  },
-
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
   "portsAttributes": {
